@@ -1,0 +1,17 @@
+
+
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+.page {
+    transition: all .5s ease;
+    height: 100vh;
+    overflow: hidden;
+}
+
+@import "./blocks/uploadarea";
+@import "./blocks/carousel";
+@import "./blocks/sidemenu";
+@import "./blocks/storageinfo";
