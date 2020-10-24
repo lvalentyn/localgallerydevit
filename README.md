@@ -1,3 +1,3 @@
 # localgallerydevit
 
-![Image alt](https://github.com/lvalentyn/localgallerydevit/raw/master/src/img/screensh.png)
+![Image alt](https://github.com/lvalentyn/localgallerydevit/raw/master/src/img/screenshot.png)
