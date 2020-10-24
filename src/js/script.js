@@ -1,4 +1,4 @@
-let fileToUpload, title, tblImage, db, isValid, fileName, reader;
+let fileToUpload, title, tblImage, db, isValid, fileName, reader, height, width, orient, createDate, imgDate;
 const connection = new JsStore.Instance(),
     imageExtension = new Array(".jpg", ".jpeg", ".png", ".bmp"),
     imageName = document.querySelector('.imageName'),
@@ -15,8 +15,10 @@ window.onload = function () {
     initJsStore('GalleryStore');/* Название хранилища в IndexedDB */
     showAllImages();/* картинки для галлереи */
     registerEvents();/* событие сохраняем картинку, добавляем свойства  */
-
 }
+
+
+
 // инициализация indexedDB ветки
 function initJsStore(dbName) {
     JsStore.isDbExist(dbName).
@@ -36,20 +38,28 @@ function initJsStore(dbName) {
 /* событие сохраняем картинку, добавляем свойства  */
 function registerEvents() {
 
+
     $("#addImage").click(function () {
-        title = $('#pub-title').val();
+        descr = $('#img_descr').val();
+
+
         saveImageToDB({
             Name: fileToUpload.name,
             ImageContent: new Blob([fileToUpload]),
             ImageType: fileToUpload.type,
-            ImageTitle: title
+            ImageSize: fileToUpload.size,
+            ImageWidth: width,
+            ImageHeight: height,
+            ImageOrientation: orient,
+            ImageDate: imgDate,
+            ImageDescr: descr
 
 
         }).then(function (rowsAffected) {
             rowsAffected > 0 && showAllImages();
             $("#imageToUploadOuter").hide();
             $("#inputImageUpload").val("");
-            $('#pub-title').val('');
+            $('#img_descr').val('');
         });
         console.log(fileToUpload);
     });
@@ -58,7 +68,7 @@ function registerEvents() {
         $("#imageToUploadOuter").hide();
         $("#imageToUpload").attr("src", "");
         $("#inputImageUpload").val("");
-        $('#pub-title').val('');
+        $('#img_descr').val('');
     });
 
     $("#btnClearImages").click(function () {
@@ -81,11 +91,11 @@ function deleteImagefromDB(Id) {
 }
 
 /* Edit Btn */
-function changeTitle(Id, newTitle) {
+function changeTitle(Id, newDescr) {
     return connection.update({
         In: "ImageTable",
         Set: {
-            ImageTitle: newTitle
+            ImageDescr: newDescr
         },
         Where: {
             Images: Number(Id)
@@ -157,16 +167,19 @@ function getImageUrlFromBlob(file) {
             const img = new Image();
             img.src = reader.result;
             img.onload = () => {
-                const height = img.naturalHeight;
-                const width = img.naturalWidth;
+                height = img.naturalHeight;
+                width = img.naturalWidth;
 
                 imageWidth.innerHTML = `<span class="metaField">Resolution:</span> ${width}x${height}`;
                 if (width > height) {
-                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> landscape`;
+                    orient = 'landscape';
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> ${orient}`;
                 } else if (height > width) {
-                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> portrait`;
+                    orient = 'portrait';
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> ${orient}`;
                 } else {
-                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> square`;
+                    orient = 'square';
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> ${orient}`;
                 }
 
             };
@@ -184,11 +197,16 @@ function uploadImage(file) {
     if (isImageValid(file)) {
         fileToUpload = file.files[0];
         previewOfImageToUpload();
+        createDate = new Date(fileToUpload.lastModifiedDate); // инициализируем переменную текущей датой
+        imgDate = createDate.toISOString(); // преобразуем дату в строку в формате ISO 8601
+
         imageName.innerHTML = `<span class="metaField">Name: </span> ${fileToUpload.name}`;
         imageType.innerHTML = `<span class="metaField">Type: </span> .${fileToUpload.type.substr(6)}`;
         imgS = (fileToUpload.size / 1000000).toFixed(2);
         imageSize.innerHTML = `<span class="metaField">Size: </span> ${imgS} mb`;
-        imageDate.innerHTML = `<span class="metaField">CreateDate: </span> ${fileToUpload.lastModifiedDate}`;
+        imageDate.innerHTML = `<span class="metaField">CreateDate: </span> ${createDate}`;
+
+
     } else {
         alert('not img')
     }
@@ -246,7 +264,7 @@ function showAllImages() {
                                     </button>
                                 </form>
                             </div>
-                            <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
+                            <div class="img-title" id="img-title${image.Images}">${image.ImageDescr}</div>
                         </div>
                             
                             `);
@@ -334,7 +352,7 @@ function showAllImages() {
                                 </form>
                             </div>
                         
-                            <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
+                            <div class="img-title" id="img-title${image.Images}">${image.ImageDescr}</div>
                         </div>
                         
                         `);
