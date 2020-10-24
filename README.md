@@ -15,5 +15,5 @@
 - Статистическая информация о текущем состоянии хранилища;
 - Удаление всех изображений;
 
-![Image alt](https://github.com/lvalentyn/localgallerydevit/raw/master/src/img/screenshot.png)
-link: https://dreamy-fermat-790328.netlify.app/
+![screen](https://github.com/lvalentyn/localgallerydevit/raw/master/src/img/screenshot.png)
+link: https://trusting-minsky-637d7a.netlify.app/

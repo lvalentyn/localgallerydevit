@@ -242,7 +242,7 @@ function showAllImages() {
                         <div class="carousel-item active" data-interval="10000" '>
                             <img src="${result}" class="d-block w-100" alt="${image.Name}">
                             <div class="imgButtons">
-                                <a class="btnDelImg">
+                                <a class="btnDelImg${image.Images} btnDelImg">
                                 <i class="fas fa-trash-alt imageicon"></i>
                                 </a>
                                 <a href="${result}" download="${image.Name}" class="btnDownloadImg">
@@ -269,7 +269,8 @@ function showAllImages() {
                             
                             `);
                         $("#btnClearImages").show();
-                        $(".btnDelImg").click(function () {
+
+                        $(`.btnDelImg${image.Images}`).click(function () {
                             deleteImagefromDB(image.Images);
                             window.location.reload();
                         })
@@ -329,7 +330,7 @@ function showAllImages() {
                             <img src="${result}" class="d-block w-100" alt="${image.Name}">
 
                             <div class="imgButtons">
-                                <a class="btnDelImg">
+                                <a class="btnDelImg${image.Images} btnDelImg">
                                 <i class="fas fa-trash-alt imageicon"></i>
                                 </a>
                                 <a href="${result}" download="${image.Name}" class="btnDownloadImg">
@@ -357,8 +358,7 @@ function showAllImages() {
                         
                         `);
 
-
-                        $(".btnDelImg").click(function () {
+                        $(`.btnDelImg${image.Images}`).click(function () {
                             deleteImagefromDB(image.Images);
                             window.location.reload();
                         })
