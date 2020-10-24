@@ -1,25 +1,21 @@
-
-// //JsStore connection
-//it will be used to store the file being uploaded
-// allowed extensions
-let fileToUpload;
-let title, imgtitle;
-const connection = new JsStore.Instance();
-const imageExtension = new Array(".jpg", ".jpeg", ".png", ".bmp");
-const imageName = document.querySelector('.imageName');
-const imageType = document.querySelector('.imageType');
-const imageSize = document.querySelector('.imageSize');
-const imageWidth = document.querySelector('.imageWidth');
-const imageDate = document.querySelector('.imageDate');
-
-
-
+let fileToUpload, title, tblImage, db, isValid, fileName, reader;
+const connection = new JsStore.Instance(),
+    imageExtension = new Array(".jpg", ".jpeg", ".png", ".bmp"),
+    imageName = document.querySelector('.imageName'),
+    imageType = document.querySelector('.imageType'),
+    imageSize = document.querySelector('.imageSize'),
+    imageWidth = document.querySelector('.imageWidth'),
+    imageDate = document.querySelector('.imageDate'),
+    imageOrientation = document.querySelector('.imageOrientation'),
+    elemQuota = document.getElementById('quota'),
+    elemUsed = document.getElementById('used'),
+    elemRemaining = document.getElementById('remaining');
 
 window.onload = function () {
     initJsStore('GalleryStore');/* Название хранилища в IndexedDB */
     showAllImages();/* картинки для галлереи */
-    registerEvents();/* кнопки */
-    updateQuota();
+    registerEvents();/* событие сохраняем картинку, добавляем свойства  */
+
 }
 // инициализация indexedDB ветки
 function initJsStore(dbName) {
@@ -28,7 +24,7 @@ function initJsStore(dbName) {
             if (isExist) {
                 connection.openDb(dbName);
             } else {
-                var db = getDBStructure(dbName);
+                db = getDBStructure(dbName);
                 connection.createDb(db);
             }
         }).
@@ -37,14 +33,13 @@ function initJsStore(dbName) {
             console.log(err);
         });
 }
-
-// подключаем кнопки
+/* событие сохраняем картинку, добавляем свойства  */
 function registerEvents() {
 
     $("#addImage").click(function () {
         title = $('#pub-title').val();
         saveImageToDB({
-            Name: fileToUpload.name, /* используется для вывода изображения в превью */
+            Name: fileToUpload.name,
             ImageContent: new Blob([fileToUpload]),
             ImageType: fileToUpload.type,
             ImageTitle: title
@@ -69,13 +64,10 @@ function registerEvents() {
     $("#btnClearImages").click(function () {
         clearTable('ImageTable').
             then(function () {
-                $("#carouselExampleInterval").hide();
-                // $(".panel-body").html("<div style='text-align:center;font-size:16px;color:#777;'>No Image Found</div>");
-                // $("#carouselExampleInterval .carousel-inner").html('<div class="carousel-item active" data-interval="10000"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Black_flag.svg/1280px-Black_flag.svg.png" class="d-block w-100" alt="\"></div>');
+                $(".carousel-wrapper").hide();
                 $("#btnClearImages").hide();
             });
     });
-
 }
 
 // для кнопки удалить
@@ -87,6 +79,8 @@ function deleteImagefromDB(Id) {
         }
     });
 }
+
+/* Edit Btn */
 function changeTitle(Id, newTitle) {
     return connection.update({
         In: "ImageTable",
@@ -106,14 +100,13 @@ function clearTable(tableName) {
 
 // Создаем в хранилище GalleryStore таблицу ImageTable
 function getDBStructure(dbName) {
-    var tblImage = {
+    tblImage = {
         Name: "ImageTable",
         Columns: [{
             Name: "Images",
             PrimaryKey: true,
             AutoIncrement: true
-        }
-        ]
+        }]
     };
     return {
         Name: dbName,
@@ -141,11 +134,7 @@ function getImages() {
 
 // валидация загруженных файлов , только картинки будут попадать в базу
 function isImageValid(file) {
-    var isValid = false,
-        fileName;
-
-
-
+    isValid = false;
     if (file.files.length > 0) {
         fileName = file.files[0].name;
         imageExtension.every(function (item) {
@@ -159,12 +148,10 @@ function isImageValid(file) {
     return isValid;
 }
 
-
-
 // получение картинки из BLOB
 function getImageUrlFromBlob(file) {
     return new Promise(function (resolve, reject) {
-        var reader = new FileReader();
+        reader = new FileReader();
         reader.onload = function (e) {
             resolve(e.target.result);
             const img = new Image();
@@ -173,7 +160,15 @@ function getImageUrlFromBlob(file) {
                 const height = img.naturalHeight;
                 const width = img.naturalWidth;
 
-                imageWidth.innerHTML = `Resolution: ${width}x${height}`;
+                imageWidth.innerHTML = `<span class="metaField">Resolution:</span> ${width}x${height}`;
+                if (width > height) {
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> landscape`;
+                } else if (height > width) {
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> portrait`;
+                } else {
+                    imageOrientation.innerHTML = `<span class="metaField">Orientation:</span> square`;
+                }
+
             };
         };
         reader.onerror = function (error) {
@@ -186,15 +181,14 @@ function getImageUrlFromBlob(file) {
 
 //получаем файл через инпут, если картинка то отправляем в превью
 function uploadImage(file) {
-
     if (isImageValid(file)) {
         fileToUpload = file.files[0];
         previewOfImageToUpload();
-        imageName.innerHTML = `Name: ${fileToUpload.name}`;
-        imageType.innerHTML = `Type: ${fileToUpload.type}`;
+        imageName.innerHTML = `<span class="metaField">Name: </span> ${fileToUpload.name}`;
+        imageType.innerHTML = `<span class="metaField">Type: </span> .${fileToUpload.type.substr(6)}`;
         imgS = (fileToUpload.size / 1000000).toFixed(2);
-        imageSize.innerHTML = `Size: ${imgS} mb`;
-        imageDate.innerHTML = `CreateDate: ${fileToUpload.lastModifiedDate}`;
+        imageSize.innerHTML = `<span class="metaField">Size: </span> ${imgS} mb`;
+        imageDate.innerHTML = `<span class="metaField">CreateDate: </span> ${fileToUpload.lastModifiedDate}`;
     } else {
         alert('not img')
     }
@@ -204,7 +198,6 @@ function uploadImage(file) {
 function previewOfImageToUpload() {
     $("#imageToUploadOuter").show();
     // вытягиваем путь к файлу
-
     getImageUrlFromBlob(fileToUpload).
         then(function (result) {
             // даем атрибуту src путь к локальному файлу
@@ -212,61 +205,52 @@ function previewOfImageToUpload() {
         });
 }
 
-// вывод картинок в галлерею
+// вводим контент в документ
 function showAllImages() {
     getImages().
         then(function (images) {
-            // $(".panel-body").html("");
-            // if (images.length == 0) {
-            //     $(".panel-body").html("<div style='text-align:center;font-size:16px;color:#777;'>No Image Found</div>");
-            //     $("#btnClearImages").hide();
-            // } else {
-            //     images.forEach(function (image) {
-            //         getImageUrlFromBlob(image.ImageContent).then(function (result) {
-            //             $(".panel-body").prepend(`<div class="mini-img" data-id="${image.Images}"><img src="${result}"></div>`);
-            //         });
-            //     });
-            //     $("#btnClearImages").show();
-            // };
-            $("#carouselExampleInterval .carousel-inner").html("");
+            $(".carousel-wrapper .carousel-inner").html("");
             if (images.length == 0) {
-                $("#carouselExampleInterval").hide('')
-                $("#carouselExampleInterval .carousel-inner").html('')
-                // $("#carouselExampleInterval .carousel-inner").html('<div class="carousel-item active" data-interval="10000"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Black_flag.svg/1280px-Black_flag.svg.png" class="d-block w-100" alt="\"></div>');
-                // $("#btnClearImages").hide();
+                $(".carousel-wrapper").hide('')
+                $(".carousel-wrapper .carousel-inner").html('')
+                $("#btnClearImages").hide();
             }
             if (images.length == 1) {
                 images.forEach(function (image) {
                     getImageUrlFromBlob(image.ImageContent).then(function (result) {
-                        $("#carouselExampleInterval").show();
-                        $("#carouselExampleInterval .carousel-inner").prepend(`<div class="carousel-item active" data-interval="10000" '>
-                        <img src="${result}" class="d-block w-100" alt="${image.Name}">
-                        <div class="imgButtons">
-                            <a class="btnDelImg">
-                            <i class="fas fa-trash-alt"></i>
-                            </a>
-                            <a href="${result}" download="${image.Name}" class="btnDownloadImg">
-                            <i class="fas fa-file-download"></i>
-                            </a>
-                            <a id="btnTitleEdit${image.Images}" class="btnTitleEdit">
-                            <i class="fas fa-edit"></i>
-                            </a>
-                            <a id="closeTitleBtn${image.Images}" class="closeTitleBtn" style="display:none;">
-                            <i class="fas fa-window-close"></i>
-                            </a>
-                            <form id="title-change${image.Images}" class="title-change" style="display:none;">
-                        <input id="title-change-input${image.Images}" type="text">
-                        <button class="selectTitleBtn">
-                        <i class="fas fa-check-square"></i>
-                        </button>
-                        <button class="delTitleBtn${image.Images} delTitleBtn">
-                        <i class="fas fa-trash-alt"></i>
-                        </button>
-                        </form>
+                        $(".carousel-wrapper").show();
+                        $(".carousel-wrapper .carousel-inner").prepend(`
+
+                        <div class="carousel-item active" data-interval="10000" '>
+                            <img src="${result}" class="d-block w-100" alt="${image.Name}">
+                            <div class="imgButtons">
+                                <a class="btnDelImg">
+                                <i class="fas fa-trash-alt imageicon"></i>
+                                </a>
+                                <a href="${result}" download="${image.Name}" class="btnDownloadImg">
+                                <i class="fas fa-file-download imageicon"></i>
+                                </a>
+                                <a id="btnTitleEdit${image.Images}" class="btnTitleEdit">
+                                <i class="fas fa-edit imageicon"></i>
+                                </a>
+                                <a id="closeTitleBtn${image.Images}" class="closeTitleBtn" style="display:none;">
+                                <i class="fas fa-window-close imageicon"></i>
+                                </a>
+                                <form id="title-change${image.Images}" class="title-change" style="display:none;">
+                                    <input maxlength='30' id="title-change-input${image.Images}" class="title-change-input" type="text">
+                                    <button class="selectTitleBtn">
+                                    <i class="fas fa-check-square"></i>
+                                    </button>
+                                    <button class="delTitleBtn${image.Images} delTitleBtn">
+                                    <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
                         </div>
-                        
-                        <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
-                        </div>`);
+                            
+                            `);
+                        $("#btnClearImages").show();
                         $(".btnDelImg").click(function () {
                             deleteImagefromDB(image.Images);
                             window.location.reload();
@@ -319,38 +303,41 @@ function showAllImages() {
             } else {
                 images.forEach(function (image) {
                     getImageUrlFromBlob(image.ImageContent).then(function (result) {
+                        $(".carousel-wrapper").show();
                         $('.carousel-item').removeClass('active');
+                        $(".carousel-wrapper .carousel-inner").prepend(`
 
-                        $("#carouselExampleInterval .carousel-inner").prepend(`<div class="carousel-item active" data-interval="10000"'>
-                        <img src="${result}" class="d-block w-100" alt="${image.Name}">
+                        <div class="carousel-item active" data-interval="10000"'>
+                            <img src="${result}" class="d-block w-100" alt="${image.Name}">
 
-                        <div class="imgButtons">
-                            <a class="btnDelImg">
-                            <i class="fas fa-trash-alt"></i>
-                            </a>
-                            <a href="${result}" download="${image.Name}" class="btnDownloadImg">
-                            <i class="fas fa-file-download"></i>
-                            </a>
-                            <a id="btnTitleEdit${image.Images}" class="btnTitleEdit">
-                            <i class="fas fa-edit"></i>
-                            </a>
-                            <a id="closeTitleBtn${image.Images}" class="closeTitleBtn" style="display:none;">
-                            <i class="fas fa-window-close"></i>
-                            </a>
-                            <form id="title-change${image.Images}" class="title-change" style="display:none;">
-                        <input id="title-change-input${image.Images}" type="text">
-                        <button class="selectTitleBtn">
-                        <i class="fas fa-check-square"></i>
-                        </button>
-                        <button class="delTitleBtn${image.Images}">
-                        <i class="fas fa-trash-alt"></i>
-                        </button>
-                        </form>
-                        </div>
-
+                            <div class="imgButtons">
+                                <a class="btnDelImg">
+                                <i class="fas fa-trash-alt imageicon"></i>
+                                </a>
+                                <a href="${result}" download="${image.Name}" class="btnDownloadImg">
+                                <i class="fas fa-file-download imageicon"></i>
+                                </a>
+                                <a id="btnTitleEdit${image.Images}" class="btnTitleEdit">
+                                <i class="fas fa-edit imageicon"></i>
+                                </a>
+                                <a id="closeTitleBtn${image.Images}" class="closeTitleBtn" style="display:none;">
+                                <i class="fas fa-window-close imageicon"></i>
+                                </a>
+                                <form id="title-change${image.Images}" class="title-change" style="display:none;">
+                                    <input maxlength='30' id="title-change-input${image.Images}" class="title-change-input" type="text">
+                                    <button class="selectTitleBtn">
+                                    <i class="fas fa-check-square"></i>
+                                    </button>
+                                    <button class="delTitleBtn${image.Images} delTitleBtn">
+                                    <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                            </div>
                         
-                        <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
-                        </div>`);
+                            <div class="img-title" id="img-title${image.Images}">${image.ImageTitle}</div>
+                        </div>
+                        
+                        `);
 
 
                         $(".btnDelImg").click(function () {
@@ -405,21 +392,14 @@ function showAllImages() {
         });
 }
 
-//   <img src="${result}" class="d-block w-100" alt="${image.Name}">
-// <div class="carousel-item active" data-interval="10000" style="background:url(${result}) center center/cover no-repeat"'>
-
-
-const elemQuota = document.getElementById('quota');
-const elemUsed = document.getElementById('used');
-const elemRemaining = document.getElementById('remaining');
-
+/* хранилище занято/доступно/всего  */
 
 function updateQuota() {
     navigator.storage.estimate().then((quota) => {
         const remaining = quota.quota - quota.usage;
         elemQuota.innerHTML = (quota.quota / 1000000).toFixed(2) + ' mb';
         elemUsed.innerHTML = (quota.usage / 1000000).toFixed(2) + ' mb';
-        elemRemaining.innerHTML = (remaining / 1000000).toFixed(0) + ' mb';
+        elemRemaining.innerHTML = (remaining / 1000000).toFixed(2) + ' mb';
     }).catch((err) => {
         console.error('*** Unable to update quota ***', err);
     }).then(() => {
@@ -429,20 +409,19 @@ function updateQuota() {
     });
 
 }
-
-
-document.getElementById('buttClear').addEventListener('click', () => {
+updateQuota();
+/*полная очистка хранилища  */
+document.getElementById('btnClearStorage').addEventListener('click', () => {
     clearAllStorage();
 });
 function clearAllStorage() {
     localStorage.clear();
-    sessionStorage.clear();
+    // sessionStorage.clear();
     connection.dropDb().
         then(function () {
             initJsStore('GalleryStore');
-            // $(".panel-body").html("<div style='text-align:center;font-size:16px;color:#777;'>No Image Found</div>");
-            // $("#carouselExampleInterval .carousel-inner").html('<div class="carousel-item active" data-interval="10000"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Black_flag.svg/1280px-Black_flag.svg.png" class="d-block w-100" alt="\"></div>');
-            $("#carouselExampleInterval").hide('')
+            $(".carousel-wrapper").hide('')
             $("#btnClearImages").hide();
         });
 };
+    /* /хранилище занято/доступно/всего  */

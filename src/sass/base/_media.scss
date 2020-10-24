@@ -1,0 +1,119 @@
+@media (max-width: 1199px) {
+    .page {
+        #check:checked ~ .wrapper {
+            margin-left: 30%;
+        }
+        .sidebar {
+            left: -30%;
+            width: 30%;
+        }
+        #check:checked ~ label #btnCloseMenu  {
+            left: 25%;
+        }
+        .imageName,.imageType,.imageSize,.imageWidth,.imageDate,.imageOrientation {
+            font-size: 13px;
+            line-height: 17px;
+        }
+        
+        .metaField {
+            font-size: 14px;
+            color: #f1f1f1;
+            font-weight: 900;
+            text-shadow: 0px 0px 4px black;
+        }
+    }
+}
+@media (max-width: 991px) {
+    .page {
+        #check:checked ~ .wrapper {
+            margin-left: 35%;
+        }
+        .sidebar {
+            left: -35%;
+            width: 35%;
+        }
+        #check:checked ~ label #btnCloseMenu  {
+            left: 30%;
+        }
+        .title-change-input {
+            display: block;
+            margin-bottom: 5px;
+        }
+    }
+}
+@media (max-width: 767px) {
+
+    .page {
+
+        .carousel-wrapper {
+            width: 80%;
+            height: 60%;
+        } 
+        .btnDelImg , .btnDownloadImg, .btnTitleEdit, .closeTitleBtn  {
+            margin: 5px;
+        }
+        #check:checked ~ .wrapper {
+            margin-left: 40%;
+        }
+        .sidebar {
+            left: -40%;
+            width: 40%;
+        }
+        #check:checked ~ label #btnCloseMenu  {
+            left: 33%;
+        }
+
+        .upload-area {
+            margin: 30px auto;
+            height: 25%;
+        }
+      
+        .upload-icon {
+            font-size: 50px;
+            display: block;
+            color: #fefefe;
+            text-align: center;
+        }
+       
+       
+    }
+}
+@media (max-width: 575px) {
+    .page {
+        #check:checked ~ .wrapper {
+            margin-left: 0%;
+        }
+        .sidebar {
+            left: -100%;
+            width: 100%;
+            z-index: 100;
+        }
+        #check:checked ~ label #btnCloseMenu  {
+            left: 88%;
+        }
+        .upload-area {
+            margin: 10px auto;
+            height: 20%;
+            width: 70%;
+        }
+     
+        .descr-wrapper {
+            text-align: center;
+        }
+        .metafields {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .metaField {
+            display: block;
+            margin: 2px auto;
+        }
+        .imageName,.imageType,.imageSize,.imageWidth,.imageDate,.imageOrientation {
+           width: 50%;
+        }
+        .btnDelImg , .btnDownloadImg, .btnTitleEdit, .closeTitleBtn  {
+            font-size: 25px;
+        }
+    }
+}

@@ -1,12 +1,12 @@
 #check:checked ~ .wrapper {
-    margin-left: 20%;
+    margin-left: 25%;
     transition: all .5s ease;
 }
 .sidebar {
     position: fixed;
     top: 0;
-    left: -20%;
-    width: 20%;
+    left: -25%;
+    width: 25%;
     height: 100%;
     background: url('../img/sidebar.png') center center/cover no-repeat;
     transition: all .5s ease;
@@ -15,13 +15,16 @@
 ul {
     list-style-type: none;
 }
-.sidebar header {
+.sidebar__title {
     font-size: 22px;
-    color: #CBCDCD;
+    color: #fff;
     text-align: center;
     line-height: 70px;
     background-color: #212b31;
+    text-shadow: 0px 0px 4px black;
+    font-weight: 700;
 }
+
 .sidebar ul a{
     display: block;
     height: 100%;
@@ -53,6 +56,16 @@ label #btnOpenMenu {
     font-size: 35px;
     color: #fff;
     padding:2px;
+    &::after {
+        content: 'Add Image';
+        line-height: 30px;
+        display: block;
+        position: absolute;
+        left: 50px;
+        top: -2px;
+        width: 20px;
+        height: 20px;
+    }
   
 }
 label #btnCloseMenu {
@@ -60,9 +73,8 @@ label #btnCloseMenu {
     left: -195px;
     top: 20px;
     font-size: 30px;
-    color: #0a5275;
+    color: #fff;
     padding: 2px;
-    background: #042331;
 }
 #check:checked ~ .sidebar {
     left: 0;
@@ -73,5 +85,34 @@ label #btnCloseMenu {
     pointer-events: none;
 }
 #check:checked ~ label #btnCloseMenu  {
-    left: 17%;
+    left: 22%;
+}
+.descr-wrapper {
+    margin: 10px 0;
+}
+#pub-title {
+    width: 100%;
+    height: 35px;
+    border-radius: 10px;
+}
+
+.pub-title-label,.pub-descr-label {
+    display: block;
+    font-size: 20px;
+    color: #f1f1f1;
+    font-weight: 900;
+    text-shadow: 0px 0px 4px black;
+}
+.imageName,.imageType,.imageSize,.imageWidth,.imageDate,.imageOrientation {
+    font-size: 17px;
+    color: #fff;
+    line-height: 23px;
+    max-height: 50px;
+    overflow: hidden;
+}
+.metaField {
+    font-size: 18px;
+    color: #f1f1f1;
+    font-weight: 900;
+    text-shadow: 0px 0px 4px black;
 }
